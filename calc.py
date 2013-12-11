@@ -29,7 +29,6 @@ def evaluate(ast, env):
         return ast['value']
     elif ast['type'] == 'identifier':
         if not ast['value'] in env:
-            print env
             raise TypeError("Identifier {} referenced before assignment".format(ast['value']))
         else:
             return env[ast['value']]
@@ -40,6 +39,8 @@ def repl(prompt=">> "):
     while running:
         try:
             input_str = raw_input(prompt)
+            if input_str == '':
+                continue
         except EOFError:
             running = False
         else:
@@ -47,16 +48,18 @@ def repl(prompt=">> "):
                 ast = lex_and_parse(input_str)
             except TypeError as e:
                 print "Syntax error: {}".format(e)
-            result = evaluate(ast, env)
-            if result is not None:
-                print result
+            else:
+                result = evaluate(ast, env)
+                if result is not None:
+                    print result
 
 def main():
     print "Reverse Polish Calculator, by Sean Gillespie"
-    print "Unfortunately it's not /Reverse/ Polish anymore..."
-    print "but now it's powered by lex and yacc!"
+    print "now powered by lex and yacc!"
     print "Control-D to exit"
     repl()
+    print ""
+    print "Bye!"
         
 if __name__ == '__main__':
     main()
