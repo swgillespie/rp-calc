@@ -1,120 +1,65 @@
-import string
-try:
-    import readline
-except ImportError:
-    pass
-    
-class SyntaxError(Exception):
-    def __init__(self, message):
-        self.message = message
+from parser import lex_and_parse
+import readline
 
-    def __str__(self):
-        return self.message
+class Environment(dict):
+    def __init__(self, initial_val={}):
+        for key, value in initial_val.iteritems():
+            self[key] = value
 
-def tokenize(string_in):
-    tokens = []
-    stack = []
-    for char in string_in:
-        if char in string.whitespace:
-            if stack == []:
-                pass
-            else:
-                token = ''.join(stack)
-                tokens.append(token)
-                stack = []
-        elif char in ['(', ')', '+', '-', '*', '/', '^', '%']:
-            tokens.append(char)
-        elif char in string.digits:
-            stack.append(char)
-        else:
-            raise SyntaxError("Character not allowed: {}".format(char))
-    if len(stack) != 0:
-        raise SyntaxError("Unexpected EOF while parsing, number stack not empty")
-    return tokens
-
-def parse(tokens):
-    return expression(tokens)
-    
-def expression(tokens):
-    ast = {
-        'type': 'expression',
-        'operand1': None,
-        'operand2': None,
-        'operator': None
-    }
-    token = tokens.pop(0)
-    if token != '(':
-        raise SyntaxError('Invalid Start of Expression; Expected {}, Got {}'.format('(', token))
-    for i in range(4):
-        token = tokens.pop(0)
-        if i == 3:
-            if token != ')':
-                raise SyntaxError('Expected {}, got {}'.format(')', token))
-        elif i == 2:
-            if token not in ['+', '-', '*', '/', '^', '%']:
-                raise SyntaxError("Expected operand, got {}".format(token))
-            ast['operator'] = token
-        elif token not in ['(', ')', '+', '-', '*', '/', '^', '%']:
-            tokens.insert(0, token)
-            ast['operand{}'.format(i + 1)] = number(tokens)
-        elif token == '(':
-            tokens.insert(0, token)
-            ast['operand{}'.format(i + 1)] = expression(tokens)
-        else:
-            raise SyntaxError('Invalid operand: expected an expression, got symbol {}'.format(token))
-    return ast
-
-def number(tokens):
-    try:
-        str2int = int(tokens.pop(0))
-    except Exception as e:
-        raise SyntaxError('Token cast to int failed: {}'.format(e))
-    else:
-        return {
-            'type': 'number',
-            'value': str2int
-        }
-
-def evaluate(ast):
-    if ast['type'] == 'number':
-        return ast['value']
+def evaluate(ast, env):
+    if ast['type'] == 'program':
+        return evaluate(ast['value'], env)
+    elif ast['type'] == 'let_expression':
+        ident = ast['identifier']
+        env[ident] = evaluate(ast['expression'], env)
+        return None
     elif ast['type'] == 'expression':
-        op1 = evaluate(ast['operand1'])
-        op2 = evaluate(ast['operand2'])
+        op1 = evaluate(ast['operand1'], env)
+        op2 = evaluate(ast['operand2'], env)
         op_func = {
             '+': lambda x, y: x + y,
             '-': lambda x, y: x - y,
-            '/': lambda x, y: x / float(y),
             '*': lambda x, y: x * y,
+            '/': lambda x, y: x / y,
             '^': lambda x, y: x ** y,
             '%': lambda x, y: x % y
         }.get(ast['operator'])
         return op_func(op1, op2)
+    elif ast['type'] == 'number':
+        return ast['value']
+    elif ast['type'] == 'identifier':
+        if not ast['value'] in env:
+            raise TypeError("Identifier {} referenced before assignment".format(ast['value']))
+        else:
+            return env[ast['value']]
 
 def repl(prompt=">> "):
     running = True
+    env = Environment()
     while running:
         try:
-            input = raw_input(prompt)
+            input_str = raw_input(prompt)
+            if input_str == '':
+                continue
         except EOFError:
-            # control-D was pressed
             running = False
         else:
             try:
-                if input == '':
-                    continue
-                tokens = tokenize(input)
-                ast = parse(tokens)
-            except SyntaxError as e:
-                print "SyntaxError: {}".format(e)
-                continue
-            print evaluate(ast)
-    print "\nBye!"
+                ast = lex_and_parse(input_str)
+            except TypeError as e:
+                print "Syntax error: {}".format(e)
+            else:
+                result = evaluate(ast, env)
+                if result is not None:
+                    print result
 
 def main():
     print "Reverse Polish Calculator, by Sean Gillespie"
+    print "now powered by lex and yacc!"
     print "Control-D to exit"
     repl()
-
+    print ""
+    print "Bye!"
+        
 if __name__ == '__main__':
     main()
