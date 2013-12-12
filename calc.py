@@ -56,7 +56,7 @@ def evaluate(ast, env):
                 if value is None:
                     raise TypeError("Identifier {} referenced before assignment"
                                     .format(argument['value']))
-            elif argument['type'] == 'expression':
+            elif argument['type'] == 'expression' or argument['type'] == 'function_call':
                 value = evaluate(argument, env)
             else:
                 value = argument['value']
