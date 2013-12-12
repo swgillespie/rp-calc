@@ -60,16 +60,16 @@ def p_let_expression(p):
 
 def p_expression(p):
     '''
-    expression : LPAREN expression expression OPERATOR RPAREN
+    expression : LPAREN OPERATOR expression expression RPAREN
                | NUMBER
                | IDENTIFIER
     '''
     if len(p) == 6:
         p[0] = {
             'type': 'expression',
-            'operand1': p[2],
-            'operand2': p[3],
-            'operator': p[4]
+            'operand1': p[3],
+            'operand2': p[4],
+            'operator': p[2]
         }
     elif type(p[1]) == str:
         p[0] = {
