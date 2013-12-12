@@ -6,23 +6,23 @@ syntax tree, which is then evaulated and printed.
 
 For example,
 ```
->> (let x (238 (3727 3828 +) *))
+>> (let x (* 238 (+ 3727 3828 )))
 >> x
 1798090
 >> (let y 88)
 >> y
 88
->> (x y /)
+>> (/ x y)
 20432
 ```
 
 It also can do floating point calculations...
 ```
->> (28.3938 25773.328 *)
+>> (* 28.3938 25773.328)
 731802.720566
->> (100 2.0 /)
+>> (/ 100 2.0)
 50.0
->> (100 3.0 /)
+>> (/ 100 3.0)
 33.3333333333
 ```
 ...and define functions
