@@ -16,7 +16,7 @@ For example,
 20432
 ```
 
-It also can do floating point calculations:
+It also can do floating point calculations...
 ```
 >> (28.3938 25773.328 *)
 731802.720566
@@ -25,11 +25,19 @@ It also can do floating point calculations:
 >> (100 3.0 /)
 33.3333333333
 ```
-This is mostly due to the power of Python over this program, but it's still cool!
+...and define functions
+```
+>> (defun square (x) (^ x 2))
+>> (square 9)
+81
+```
 
 Also, thanks to the wonderful thing that is yacc, the grammar is self documenting in parser.py.
 
 ### Running instructions
+This project requires GNU bison and flex. Bison and flex come with Xcode's command line tools on Mac OS 
+X, and may or may not come with Linux depending on your distro.
+
 To run the calculator, clone this repo
 ```
 git clone https://github.com/swgillespie/rp-calc.git
