@@ -1,4 +1,4 @@
-## Reverse Polish Calculator
+## rp-calc - A small Lisp-esque calculator language
 
 This project is a tiny little calculator with vague reverse Lisp-like syntax. It supports six binary operations: addition, subtraction, multiplication, division,
 exponentiation, and modulo. It also supports the definition and reference of variables. Unlike many Reverse Polish calculators, this calculator is not stack-based; the input is tokenized and parsed into an abstract
