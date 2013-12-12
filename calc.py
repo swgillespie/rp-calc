@@ -11,7 +11,7 @@ def evaluate(ast, env):
         return evaluate(ast['value'], env)
     elif ast['type'] == 'let_expression':
         ident = ast['identifier']
-        env[ident] = evaluate(ast['expression'], env)
+        env[ident] =  evaluate(ast['expression'], env)
         return None
     elif ast['type'] == 'expression':
         op1 = evaluate(ast['operand1'], env)
@@ -32,6 +32,37 @@ def evaluate(ast, env):
             raise TypeError("Identifier {} referenced before assignment".format(ast['value']))
         else:
             return env[ast['value']]
+    elif ast['type'] == 'defun_expression':
+        ident = ast['fn_name']
+        env[ident] = {
+            'num_args' : len(ast['param_list']),
+            'args' : ast['param_list'],
+            'expression': ast['expression']
+        }
+    elif ast['type'] == 'function_call':
+        ident = ast['fn_name']
+        if ident not in env:
+            raise TypeError("Function {} not defined".format(ident))
+        env_val = env[ident]
+        if type(env_val) != dict:
+            raise TypeError("Variable {} is not callable".format(ident))
+        if len(ast['args']) != env_val['num_args']:
+            raise TypeError("Function {} expects {} arguments, got {}"
+                            .format(ident, env_val['num_args'], len(ast['args'])))
+        subenv = Environment(initial_val=env)
+        for argument, binding in zip(ast['args'], env_val['args']):
+            if argument['type'] == 'identifier':
+                value = env.get(argument['value'])
+                if value is None:
+                    raise TypeError("Identifier {} referenced before assignment"
+                                    .format(argument['value']))
+            elif argument['type'] == 'expression' or argument['type'] == 'function_call':
+                value = evaluate(argument, env)
+            else:
+                value = argument['value']
+            subenv[binding] = value
+        return evaluate(env_val['expression'], subenv)
+    
 
 def repl(prompt=">> "):
     running = True
@@ -49,9 +80,13 @@ def repl(prompt=">> "):
             except TypeError as e:
                 print "Syntax error: {}".format(e)
             else:
-                result = evaluate(ast, env)
-                if result is not None:
-                    print result
+                try:
+                    result = evaluate(ast, env)
+                except TypeError as e:
+                    print "Runtime error: {}".format(e)
+                else:
+                    if result is not None:
+                        print result
 
 def main():
     print "Reverse Polish Calculator, by Sean Gillespie"
