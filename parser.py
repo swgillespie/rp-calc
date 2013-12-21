@@ -1,6 +1,6 @@
 import ply.lex as lex
 import ply.yacc as yacc
-import pprint
+
 
 reserved_words = {
     'let': 'LET',
@@ -33,22 +33,32 @@ t_LPAREN = '\('
 t_RPAREN = '\)'
 
 def t_error(t):
-    raise TypeError("Invalid character: {}".format(t.value[0]))
+    raise TypeError("Invalid character: {}".format(t.lexer.lineno, t.value[0]))
 
-t_ignore = r' '
+t_ignore = r''.join([' ', '\n', '\t'])
+
     
 lex.lex()
 
 def p_program(p):
     '''
-    program : let_expression
-            | expression
-            | defun_expression
+    program : let_expression program
+            | expression program
+            | defun_expression program
+            |
     '''
-    p[0] = {
-        'type': 'program',
-        'value': p[1]
-    }
+    
+    if len(p) > 1:
+        sub_ast = p[2].get('value', None)
+        p[0] = {
+            'type': 'program',
+            'value': [p[1]] + sub_ast if sub_ast is not None else [p[1]]
+        }
+    else:
+        p[0] = {
+            'type': 'program',
+            'value': None
+        }
 
 def p_defun_expression(p):
     '''
