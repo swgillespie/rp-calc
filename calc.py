@@ -13,6 +13,13 @@ def evaluate(ast, env):
             value = evaluate(command, env)
             if value is not None:
                 print value
+    elif ast['type'] == 'branch':
+        condition = evaluate(ast['condition'], env)
+        if condition: 
+            result = evaluate(ast['true_branch'], env)
+        else:
+            result = evaluate(ast['false_branch'], env)
+        return result
     elif ast['type'] == 'let_expression':
         ident = ast['identifier']
         env[ident] =  evaluate(ast['expression'], env)
@@ -26,7 +33,10 @@ def evaluate(ast, env):
             '*': lambda x, y: x * y,
             '/': lambda x, y: x / y,
             '^': lambda x, y: x ** y,
-            '%': lambda x, y: x % y
+            '%': lambda x, y: x % y,
+            '>': lambda x, y: int(x > y),
+            '<': lambda x, y: int(x < y),
+            '=': lambda x, y: int(x == y)
         }.get(ast['operator'])
         return op_func(op1, op2)
     elif ast['type'] == 'number':
@@ -68,9 +78,8 @@ def evaluate(ast, env):
         return evaluate(env_val['expression'], subenv)
     
 
-def repl(prompt=">> "):
+def repl(env, prompt=">> "):
     running = True
-    env = Environment()
     while running:
         try:
             input_str = raw_input(prompt)
@@ -89,19 +98,23 @@ def repl(prompt=">> "):
                 except TypeError as e:
                     print "Runtime error: {}".format(e)
 
-def script_eval(str_prog):
-    env = Environment()
+def script_eval(str_prog, env):
     ast = lex_and_parse(str_prog)
     evaluate(ast, env)
                         
 def main():
+    env = Environment()
+    print "Loading standard library..."
+    stdlib = open('./calc_lib/stdlib.calc', 'r').read()
+    script_eval(stdlib, env)
+    print "...done!"
     if len(sys.argv) not in [1, 2]:
         print "Usage: calc.py [filename]"
         sys.exit(1)
     elif len(sys.argv) == 2:
         try:
             with open(sys.argv[1], 'r') as f:
-                script_eval(f.read())
+                script_eval(f.read(), env)
         except IOError as e:
             print "Error: {}".format(e)
             sys.exit(1)
@@ -109,7 +122,7 @@ def main():
         print "Reverse Polish Calculator, by Sean Gillespie"
         print "now powered by lex and yacc!"
         print "Control-D to exit"
-        repl()
+        repl(env)
         print ""
         print "Bye!"
         
