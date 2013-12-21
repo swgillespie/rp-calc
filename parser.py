@@ -30,7 +30,7 @@ def t_NUMBER(t):
         t.value = float(t.value)
     return t
     
-t_OPERATOR = r'[\+-\^%\*/]'
+t_OPERATOR = r'[\+-\^%\*/><=]'
 t_LPAREN = '\('
 t_RPAREN = '\)'
 
