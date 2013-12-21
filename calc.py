@@ -1,4 +1,5 @@
 from parser import lex_and_parse
+import sys
 import readline
 
 class Environment(dict):
@@ -8,7 +9,10 @@ class Environment(dict):
 
 def evaluate(ast, env):
     if ast['type'] == 'program':
-        return evaluate(ast['value'], env)
+        for command in ast['value']:
+            value = evaluate(command, env)
+            if value is not None:
+                print value
     elif ast['type'] == 'let_expression':
         ident = ast['identifier']
         env[ident] =  evaluate(ast['expression'], env)
@@ -81,20 +85,33 @@ def repl(prompt=">> "):
                 print "Syntax error: {}".format(e)
             else:
                 try:
-                    result = evaluate(ast, env)
+                    evaluate(ast, env)
                 except TypeError as e:
                     print "Runtime error: {}".format(e)
-                else:
-                    if result is not None:
-                        print result
 
+def script_eval(str_prog):
+    env = Environment()
+    ast = lex_and_parse(str_prog)
+    evaluate(ast, env)
+                        
 def main():
-    print "Reverse Polish Calculator, by Sean Gillespie"
-    print "now powered by lex and yacc!"
-    print "Control-D to exit"
-    repl()
-    print ""
-    print "Bye!"
+    if len(sys.argv) not in [1, 2]:
+        print "Usage: calc.py [filename]"
+        sys.exit(1)
+    elif len(sys.argv) == 2:
+        try:
+            with open(sys.argv[1], 'r') as f:
+                script_eval(f.read())
+        except IOError as e:
+            print "Error: {}".format(e)
+            sys.exit(1)
+    else:
+        print "Reverse Polish Calculator, by Sean Gillespie"
+        print "now powered by lex and yacc!"
+        print "Control-D to exit"
+        repl()
+        print ""
+        print "Bye!"
         
 if __name__ == '__main__':
     main()

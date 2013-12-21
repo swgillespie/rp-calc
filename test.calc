@@ -1,0 +1,5 @@
+(defun square (x) (^ x 2))
+(square 9)
+(square 4)
+(+ (square 2) (square 4))
+(square (square 9))
