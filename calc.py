@@ -13,6 +13,13 @@ def evaluate(ast, env):
             value = evaluate(command, env)
             if value is not None:
                 print value
+    elif ast['type'] == 'branch':
+        condition = evaluate(ast['condition'], env)
+        if condition: 
+            result = evaluate(ast['true_branch'], env)
+        else:
+            result = evaluate(ast['false_branch'], env)
+        return result
     elif ast['type'] == 'let_expression':
         ident = ast['identifier']
         env[ident] =  evaluate(ast['expression'], env)
@@ -88,6 +95,7 @@ def repl(prompt=">> "):
                     evaluate(ast, env)
                 except TypeError as e:
                     print "Runtime error: {}".format(e)
+                    raise
 
 def script_eval(str_prog):
     env = Environment()

@@ -4,7 +4,9 @@ import ply.yacc as yacc
 
 reserved_words = {
     'let': 'LET',
-    'defun': 'DEFUN'
+    'defun': 'DEFUN',
+    'if': 'IF',
+    'else': 'ELSE'
 }
 
 tokens = [
@@ -94,6 +96,7 @@ def p_let_expression(p):
 def p_expression(p):
     '''
     expression : LPAREN OPERATOR expression expression RPAREN
+               | LPAREN IF expression expression ELSE expression RPAREN
                | function_call
                | ident_or_num
     '''
@@ -103,6 +106,13 @@ def p_expression(p):
             'operand1': p[3],
             'operand2': p[4],
             'operator': p[2]
+        }
+    elif len(p) == 8:
+        p[0] = {
+            'type': 'branch',
+            'condition': p[3],
+            'true_branch': p[4],
+            'false_branch': p[6]
         }
     else:
         p[0] = p[1]
