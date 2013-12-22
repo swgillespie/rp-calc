@@ -32,6 +32,15 @@ It also can do floating point calculations...
 81
 ```
 
+...and conditionally branch:
+```
+>> (defun switch (x) (if x 5 else 10))
+>> (switch 1)
+10
+>> (switch 0)
+5
+```
+
 Also, thanks to the wonderful thing that is yacc, the grammar is self documenting in parser.py.
 
 ### Running instructions
@@ -51,4 +60,9 @@ will start the read-eval-print loop. This program was written under Python 2.7 a
 throw syntax errors in Python 3.
 
 This project is my first in what is hopefully a series of projects for me where I will attempt to build a compiler.
+
 I will be working through a book over the next few months. Stay tuned if you are interested!
+
+### Standard Library
+I started to build a standard library in rpcalc that is automatically loaded when the interpreter starts up. It's a collection of commonly used functions so that the user doesn't have to define it themselves. There are 6 functions defined in stdlib: logical not, logical or, logical and, greater than, less than, and fibonacci. Check it out for some sample functions!
+
