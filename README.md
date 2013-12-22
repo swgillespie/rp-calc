@@ -34,7 +34,7 @@ It also can do floating point calculations...
 
 ...and conditionally branch:
 ```
->> (defun switch (x) (if x 5 else 10))
+>> (defun switch (x) (if (= x 0) 5 else 10))
 >> (switch 1)
 5
 >> (switch 0)
