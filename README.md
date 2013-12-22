@@ -36,9 +36,9 @@ It also can do floating point calculations...
 ```
 >> (defun switch (x) (if x 5 else 10))
 >> (switch 1)
-10
->> (switch 0)
 5
+>> (switch 0)
+10
 ```
 
 Also, thanks to the wonderful thing that is yacc, the grammar is self documenting in parser.py.
